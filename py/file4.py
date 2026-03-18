@@ -1,31 +1,31 @@
-# Psevdokod
-"""
-ALGORITM SelectionSort(Massiv)
-    n = Massiv uzunligi
-    FOR i = 0 TO n-1:
-        min_index = i
-        FOR j = i+1 TO n-1:
-            IF Massiv[j] < Massiv[min_index]:
-                min_index = j
-        SWAP(Massiv[i], Massiv[min_index])
-OXIRI
-"""
-def selection_sort(arr):
-    n = len(arr)
-    for i in range(n):
-        # Hozircha i-chi elementni eng kichik deb olamiz
-        min_idx = i
-        
-        # Undan keyingi qismdan eng kichigini qidiramiz
-        for j in range(i + 1, n):
-            if arr[j] < arr[min_idx]:
-                min_idx = j
-                
-        # Topilgan eng kichik elementni i-chi o'rin bilan almashtiramiz
-        arr[i], arr[min_idx] = arr[min_idx], arr[i]
-    
-    return arr
+# Queue klass
+class Queue:
+    def __init__(self):
+        self.items = []
 
-# Sinov uchun:
-numbers = [5, 2, 9, 1, 7]
-print("Saralangan massiv:", selection_sort(numbers))
+    def enqueue(self, item):
+        self.items.append(item)
+
+    def dequeue(self):
+        if not self.is_empty():
+            return self.items.pop(0)
+
+    def front(self):
+        if not self.is_empty():
+            return self.items[0]
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+
+q = Queue()
+q.enqueue(10)
+q.enqueue(20)
+q.enqueue(30)
+
+print(q.front())
+print(q.dequeue())
+print(q.size())

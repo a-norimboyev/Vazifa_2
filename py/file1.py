@@ -1,28 +1,31 @@
-def find_minimum(arr):
-    # Massing bronchi elementini min deb olimit
-    min_val = arr[0]
-    
-    # Har bir elementini solishtirib chiai
-    for x in arr:
-        if x < min_val:
-            min_val = x
-            
-    return min_val
+# Stack klass va metodlar
+class Stack:
+    def __init__(self):
+        self.items = []
 
-# Berlin massif
-numbers = [5, 2, 9, 1, 7]
-result = find_minimum(numbers)
-print(f"Massivdagi eng kick element: {result}")
+    def push(self, item):
+        self.items.append(item)
+
+    def pop(self):
+        if not self.is_empty():
+            return self.items.pop()
+
+    def peek(self):
+        if not self.is_empty():
+            return self.items[-1]
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
 
 
+stack = Stack()
+for i in range(1, 6):
+    stack.push(i)
 
-""" 
-Psevdokod
-ALGORITM FindMin(Massiv)
-    min = Massiv[0]
-    HAR BIR element UCHUN (Massiv ichidagi):
-        AGAR element < min BO'LSA:
-            min = element
-    NATIJA min
-OXIRI
-"""
+print("Size:", stack.size())
+print("Top:", stack.peek())
+print("Pop:", stack.pop())
+print("Empty:", stack.is_empty())

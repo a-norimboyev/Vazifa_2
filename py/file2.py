@@ -1,18 +1,13 @@
-def sum_digits_iterative(n):
-    total = 0
-    n = abs(n)  # Manfiy sonlar bilan ham ishlash uchun
-    while n > 0:
-        total += n % 10  # Oxirgi raqamni qo'shish
-        n //= 10         # Oxirgi raqamni olib tashlash
-    return total
+# Satrni teskari qilish (Stack)
+def reverse_string(s):
+    stack = []
+    for ch in s:
+        stack.append(ch)
 
-# Rekursiv usul
-"""
-def sum_digits_recursive(n):
-    n = abs(n)
-    # To'xtash sharti (Base case)
-    if n == 0:
-        return 0
-    # Rekursiv qadam
-    return (n % 10) + sum_digits_recursive(n // 10)
-"""
+    reversed_str = ""
+    while stack:
+        reversed_str += stack.pop()
+
+    return reversed_str
+
+print(reverse_string("salom"))
