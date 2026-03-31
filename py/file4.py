@@ -1,31 +1,24 @@
-# Queue klass
-class Queue:
-    def __init__(self):
-        self.items = []
-
-    def enqueue(self, item):
-        self.items.append(item)
-
-    def dequeue(self):
-        if not self.is_empty():
-            return self.items.pop(0)
-
-    def front(self):
-        if not self.is_empty():
-            return self.items[0]
-
-    def is_empty(self):
-        return len(self.items) == 0
-
-    def size(self):
-        return len(self.items)
+"""4-vazifa: tanlov saralash va har iteratsiyadan keyin chop etish."""
 
 
-q = Queue()
-q.enqueue(10)
-q.enqueue(20)
-q.enqueue(30)
+def selection_sort_with_steps(arr):
+    result = arr[:]
+    n = len(result)
 
-print(q.front())
-print(q.dequeue())
-print(q.size())
+    for i in range(n):
+        min_index = i
+        for j in range(i + 1, n):
+            if result[j] < result[min_index]:
+                min_index = j
+
+        result[i], result[min_index] = result[min_index], result[i]
+        print(f"{i + 1}-iteratsiya: {result}")
+
+    return result
+
+
+if __name__ == "__main__":
+    data = [64, 25, 12, 22, 11]
+    print("Boshlang'ich massiv:", data)
+    final_arr = selection_sort_with_steps(data)
+    print("Yakuniy massiv:", final_arr)

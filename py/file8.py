@@ -1,18 +1,23 @@
-# Palindrom tekshirish (Stack + Queue)
-from collections import deque
+"""8-vazifa: saralangan massivda qo'shish pozitsiyasi (ikkilik qidiruv)."""
 
-def is_palindrome(word):
-    stack = []
-    queue = deque()
 
-    for ch in word:
-        stack.append(ch)
-        queue.append(ch)
+def find_insertion_position(arr, target):
+    """Target joylashishi kerak bo'lgan eng chap indeksni qaytaradi."""
+    left, right = 0, len(arr)
 
-    while stack:
-        if stack.pop() != queue.popleft():
-            return False
+    while left < right:
+        mid = (left + right) // 2
+        if arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid
 
-    return True
+    return left
 
-print(is_palindrome("level"))
+
+if __name__ == "__main__":
+    nums = [1, 3, 5, 6]
+    x = 4
+    pos = find_insertion_position(nums, x)
+    print("Massiv:", nums)
+    print(f"{x} uchun qo'shish pozitsiyasi: {pos}")

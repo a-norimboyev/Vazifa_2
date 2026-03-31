@@ -1,29 +1,45 @@
-# Deque klass
-class Deque:
-    def __init__(self):
-        self.items = []
-
-    def add_front(self, item):
-        self.items.insert(0, item)
-
-    def add_rear(self, item):
-    ppend(item)
-
-    def remove_front(self):
-        return self.items.pop(0)
-
-    def remove_rear(self):
-        return self.items.pop()
-
-    def is_empty(self):
-        return len(self.items) == 0
-
-    def size(self):
-        return len(self.items)
+"""9-vazifa: gibrid saralash (quick sort + insertion sort)."""
 
 
-d = Deque()
-d.add_front(1)
-d.add_rear(2)
-print(d.remove_front())
-print(d.size())
+def insertion_sort_range(arr, low, high):
+    for i in range(low + 1, high + 1):
+        key = arr[i]
+        j = i - 1
+        while j >= low and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+
+
+def partition(arr, low, high):
+    pivot = arr[high]
+    i = low - 1
+    for j in range(low, high):
+        if arr[j] <= pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1
+
+
+def hybrid_sort(arr, low=0, high=None, threshold=10):
+    if high is None:
+        high = len(arr) - 1
+
+    if low >= high:
+        return arr
+
+    if high - low + 1 < threshold:
+        insertion_sort_range(arr, low, high)
+    else:
+        pi = partition(arr, low, high)
+        hybrid_sort(arr, low, pi - 1, threshold)
+        hybrid_sort(arr, pi + 1, high, threshold)
+
+    return arr
+
+
+if __name__ == "__main__":
+    nums = [12, 11, 13, 5, 6, 7, 4, 15, 2, 9, 1]
+    print("Boshlang'ich:", nums)
+    print("Gibrid saralangan:", hybrid_sort(nums[:]))

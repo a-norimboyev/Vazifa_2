@@ -1,31 +1,18 @@
-# Stack klass va metodlar
-class Stack:
-    def __init__(self):
-        self.items = []
-
-    def push(self, item):
-        self.items.append(item)
-
-    def pop(self):
-        if not self.is_empty():
-            return self.items.pop()
-
-    def peek(self):
-        if not self.is_empty():
-            return self.items[-1]
-
-    def is_empty(self):
-        return len(self.items) == 0
-
-    def size(self):
-        return len(self.items)
+"""1-vazifa: satrlar massivida chiziqli qidiruv."""
 
 
-stack = Stack()
-for i in range(1, 6):
-    stack.push(i)
+def linear_search_first(strings, target):
+    """Berilgan satrning birinchi uchrashgan indeksini qaytaradi."""
+    for index, value in enumerate(strings):
+        if value == target:
+            return index
+    return -1
 
-print("Size:", stack.size())
-print("Top:", stack.peek())
-print("Pop:", stack.pop())
-print("Empty:", stack.is_empty())
+
+if __name__ == "__main__":
+    words = ["olma", "anor", "nok", "anor", "shaftoli"]
+    query = "anor"
+    result = linear_search_first(words, query)
+    print(f"Massiv: {words}")
+    print(f"Qidirilgan satr: {query}")
+    print(f"Birinchi indeks: {result}")

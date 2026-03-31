@@ -1,49 +1,43 @@
-# 1. Binar daraxt (3 xil traversal bilan)
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.left = None
-        self.right = None
+"""11-vazifa: Bo'lin va zabt et usuli bilan massivdagi inversiyalar sonini hisoblash.
 
-class BinaryTree:
-    def __init__(self):
-        self.root = None
+Inversiya — bu i < j indekslar juftligi bo'lib, arr[i] > arr[j].
+Merge sort asosida O(n log n) yechim.
+"""
 
-    def insert(self, data):
-        if self.root is None:
-            self.root = Node(data)
+
+def count_inversions(arr):
+    """Inversiyalar sonini va saralangan massivni qaytaradi."""
+    if len(arr) <= 1:
+        return arr[:], 0
+
+    mid = len(arr) // 2
+    left, left_inv = count_inversions(arr[:mid])
+    right, right_inv = count_inversions(arr[mid:])
+
+    merged = []
+    inversions = left_inv + right_inv
+    i = j = 0
+
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            merged.append(left[i])
+            i += 1
         else:
-            self._insert(self.root, data)
+            merged.append(right[j])
+            inversions += len(left) - i
+            j += 1
 
-    def _insert(self, node, data):
-        if data < node.data:
-            if node.left:
-                self._insert(node.left, data)
-            else:
-                node.left = Node(data)
-        else:
-            if node.right:
-                self._insert(node.right, data)
-            else:
-                node.right = Node(data)
+    merged.extend(left[i:])
+    merged.extend(right[j:])
+    return merged, inversions
 
-    # In-order
-    def inorder(self, node):
-        if node:
-            self.inorder(node.left)
-            print(node.data, end=" ")
-            self.inorder(node.right)
 
-    # Pre-order
-    def preorder(self, node):
-        if node:
-            print(node.data, end=" ")
-            self.preorder(node.left)
-            self.preorder(node.right)
-
-    # Post-order
-    def postorder(self, node):
-        if node:
-            self.postorder(node.left)
-            self.postorder(node.right)
-            print(node.data, end=" ")
+if __name__ == "__main__":
+    test_cases = [
+        [2, 4, 1, 3, 5],
+        [5, 4, 3, 2, 1],
+        [1, 2, 3, 4, 5],
+    ]
+    for arr in test_cases:
+        _, inv_count = count_inversions(arr)
+        print(f"Massiv: {arr}  ->  Inversiyalar soni: {inv_count}")
