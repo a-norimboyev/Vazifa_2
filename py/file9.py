@@ -1,45 +1,175 @@
-"""9-vazifa: gibrid saralash (quick sort + insertion sort)."""
+"""9-vazifa: Producer-Consumer tizimi ustuvor (prioritetli) navbat bilan."""
+
+import threading
+import queue
+import time
+import random
 
 
-def insertion_sort_range(arr, low, high):
-    for i in range(low + 1, high + 1):
-        key = arr[i]
-        j = i - 1
-        while j >= low and arr[j] > key:
-            arr[j + 1] = arr[j]
-            j -= 1
-        arr[j + 1] = key
+# Ustuvorlik nomlari
+USTUVORLIK_NOMLARI = {1: "YUQORI", 2: "O'RTA", 3: "PAST"}
+
+# Tugash signali
+TUGASH = "TUGASH"
 
 
-def partition(arr, low, high):
-    pivot = arr[high]
-    i = low - 1
-    for j in range(low, high):
-        if arr[j] <= pivot:
-            i += 1
-            arr[i], arr[j] = arr[j], arr[i]
-    arr[i + 1], arr[high] = arr[high], arr[i + 1]
-    return i + 1
+class Vazifa:
+    """Ustuvorlikka ega vazifa."""
+
+    _counter = 0
+    _lock = threading.Lock()
+
+    def __init__(self, ustuvorlik, nomi, malumot):
+        self.ustuvorlik = ustuvorlik  # 1=yuqori, 2=o'rta, 3=past
+        self.nomi = nomi
+        self.malumot = malumot
+        self.yaratilgan_vaqt = time.perf_counter()
+
+        # PriorityQueue uchun tartib raqami (bir xil ustuvorlikda FIFO)
+        with Vazifa._lock:
+            Vazifa._counter += 1
+            self._tartib = Vazifa._counter
+
+    def __lt__(self, boshqa):
+        """PriorityQueue uchun solishtirish."""
+        if self.ustuvorlik == boshqa.ustuvorlik:
+            return self._tartib < boshqa._tartib
+        return self.ustuvorlik < boshqa.ustuvorlik
+
+    def __repr__(self):
+        return f"Vazifa({USTUVORLIK_NOMLARI[self.ustuvorlik]}, '{self.nomi}')"
 
 
-def hybrid_sort(arr, low=0, high=None, threshold=10):
-    if high is None:
-        high = len(arr) - 1
+def ishlab_chiqaruvchi(producer_id, navbat, vazifalar_soni, stop_event):
+    """Turli ustuvorlikdagi vazifalarni yaratadi."""
+    nom = f"Producer-{producer_id}"
 
-    if low >= high:
-        return arr
+    for i in range(vazifalar_soni):
+        if stop_event.is_set():
+            break
 
-    if high - low + 1 < threshold:
-        insertion_sort_range(arr, low, high)
-    else:
-        pi = partition(arr, low, high)
-        hybrid_sort(arr, low, pi - 1, threshold)
-        hybrid_sort(arr, pi + 1, high, threshold)
+        ustuvorlik = random.choice([1, 2, 3])
+        vazifa = Vazifa(
+            ustuvorlik=ustuvorlik,
+            nomi=f"{nom}_vazifa_{i+1}",
+            malumot=f"Ma'lumot #{random.randint(100, 999)}",
+        )
+        navbat.put(vazifa)
+        print(
+            f"  [{nom}] Yaratdi: {vazifa.nomi} "
+            f"(ustuvorlik: {USTUVORLIK_NOMLARI[ustuvorlik]})"
+        )
+        time.sleep(random.uniform(0.05, 0.2))
 
-    return arr
+    print(f"  [{nom}] Barcha vazifalar yaratildi.")
+
+
+def istehmolchi(consumer_id, navbat, bajarilgan, stop_event):
+    """Navbatdan vazifalarni ustuvorlik tartibida oladi va qayta ishlaydi."""
+    nom = f"Consumer-{consumer_id}"
+    ishlov_soni = 0
+
+    while not stop_event.is_set():
+        try:
+            vazifa = navbat.get(timeout=1)
+        except queue.Empty:
+            continue
+
+        if vazifa == TUGASH:
+            navbat.task_done()
+            break
+
+        # Vazifani qayta ishlash
+        kutish = time.perf_counter() - vazifa.yaratilgan_vaqt
+        print(
+            f"  [{nom}] Ishlayapti: {vazifa.nomi} "
+            f"({USTUVORLIK_NOMLARI[vazifa.ustuvorlik]}, "
+            f"kutish: {kutish:.3f}s)"
+        )
+        time.sleep(random.uniform(0.1, 0.3))  # Ishlov berish simulyatsiyasi
+
+        bajarilgan.append({
+            "vazifa": vazifa.nomi,
+            "ustuvorlik": vazifa.ustuvorlik,
+            "consumer": nom,
+            "kutish_vaqti": kutish,
+        })
+        ishlov_soni += 1
+        navbat.task_done()
+
+    print(f"  [{nom}] Tugadi ({ishlov_soni} ta vazifa bajarildi).")
 
 
 if __name__ == "__main__":
-    nums = [12, 11, 13, 5, 6, 7, 4, 15, 2, 9, 1]
-    print("Boshlang'ich:", nums)
-    print("Gibrid saralangan:", hybrid_sort(nums[:]))
+    PRODUCERLAR_SONI = 3
+    CONSUMERLAR_SONI = 2
+    HAR_PRODUCER_VAZIFALAR = 5
+
+    navbat = queue.PriorityQueue()
+    bajarilgan = []  # Natijalar
+    stop_event = threading.Event()
+
+    print("=" * 65)
+    print("PRODUCER-CONSUMER TIZIMI (Ustuvor navbat bilan)")
+    print("=" * 65)
+    print(f"Producerlar: {PRODUCERLAR_SONI}, Consumerlar: {CONSUMERLAR_SONI}")
+    print(f"Har bir producer {HAR_PRODUCER_VAZIFALAR} ta vazifa yaratadi.")
+    print()
+
+    boshi = time.perf_counter()
+
+    # Producerlarni yaratish
+    producer_oqimlari = []
+    for i in range(PRODUCERLAR_SONI):
+        t = threading.Thread(
+            target=ishlab_chiqaruvchi,
+            args=(i + 1, navbat, HAR_PRODUCER_VAZIFALAR, stop_event),
+        )
+        producer_oqimlari.append(t)
+
+    # Consumerlarni yaratish
+    consumer_oqimlari = []
+    for i in range(CONSUMERLAR_SONI):
+        t = threading.Thread(
+            target=istehmolchi,
+            args=(i + 1, navbat, bajarilgan, stop_event),
+        )
+        consumer_oqimlari.append(t)
+
+    # Barcha oqimlarni ishga tushirish
+    for t in consumer_oqimlari:
+        t.start()
+    for t in producer_oqimlari:
+        t.start()
+
+    # Producerlar tugashini kutish
+    for t in producer_oqimlari:
+        t.join()
+
+    # Consumerlarni to'xtatish uchun tugash signallari
+    for _ in range(CONSUMERLAR_SONI):
+        navbat.put(TUGASH)
+
+    for t in consumer_oqimlari:
+        t.join()
+
+    umumiy_vaqt = time.perf_counter() - boshi
+
+    # Natijalar statistikasi
+    print("\n" + "=" * 65)
+    print("NATIJALAR:")
+    print("=" * 65)
+
+    ustuvorlik_soni = {1: 0, 2: 0, 3: 0}
+    for b in bajarilgan:
+        ustuvorlik_soni[b["ustuvorlik"]] += 1
+
+    print(f"Jami bajarilgan vazifalar: {len(bajarilgan)}")
+    for ust, soni in sorted(ustuvorlik_soni.items()):
+        print(f"  {USTUVORLIK_NOMLARI[ust]}: {soni} ta")
+
+    if bajarilgan:
+        ortacha_kutish = sum(b["kutish_vaqti"] for b in bajarilgan) / len(bajarilgan)
+        print(f"O'rtacha kutish vaqti: {ortacha_kutish:.3f} s")
+
+    print(f"Umumiy vaqt: {umumiy_vaqt:.2f} s")
