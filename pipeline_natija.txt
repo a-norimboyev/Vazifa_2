@@ -1,0 +1,14 @@
+Indeks | Xom ma'lumot | Ishlangan ma'lumot
+--------------------------------------------------
+    1 |           salom |                SALOM
+    2 |               5 |                   25
+    3 |           dunyo |                DUNYO
+    4 |              12 |                  144
+    5 |          python |               PYTHON
+    6 |               7 |                   49
+    7 |        pipeline |             PIPELINE
+    8 |              25 |                  625
+    9 |            oqim |                 OQIM
+   10 |               3 |                    9
+   11 |            test |                 TEST
+   12 |             100 |                10000
