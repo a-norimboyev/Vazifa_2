@@ -9,9 +9,6 @@ import random
 # Ustuvorlik nomlari
 USTUVORLIK_NOMLARI = {1: "YUQORI", 2: "O'RTA", 3: "PAST"}
 
-# Tugash signali
-TUGASH = "TUGASH"
-
 
 class Vazifa:
     """Ustuvorlikka ega vazifa."""
@@ -19,10 +16,11 @@ class Vazifa:
     _counter = 0
     _lock = threading.Lock()
 
-    def __init__(self, ustuvorlik, nomi, malumot):
+    def __init__(self, ustuvorlik, nomi, malumot, tugash=False):
         self.ustuvorlik = ustuvorlik  # 1=yuqori, 2=o'rta, 3=past
         self.nomi = nomi
         self.malumot = malumot
+        self.tugash = tugash
         self.yaratilgan_vaqt = time.perf_counter()
 
         # PriorityQueue uchun tartib raqami (bir xil ustuvorlikda FIFO)
@@ -32,12 +30,22 @@ class Vazifa:
 
     def __lt__(self, boshqa):
         """PriorityQueue uchun solishtirish."""
+        # Tugash signallari doimo oxirgi
+        if self.tugash != boshqa.tugash:
+            return not self.tugash
         if self.ustuvorlik == boshqa.ustuvorlik:
             return self._tartib < boshqa._tartib
         return self.ustuvorlik < boshqa.ustuvorlik
 
     def __repr__(self):
+        if self.tugash:
+            return "Vazifa(TUGASH)"
         return f"Vazifa({USTUVORLIK_NOMLARI[self.ustuvorlik]}, '{self.nomi}')"
+
+
+def tugash_signali():
+    """PriorityQueue uchun mos tugash signali yaratadi."""
+    return Vazifa(ustuvorlik=999, nomi="TUGASH", malumot="", tugash=True)
 
 
 def ishlab_chiqaruvchi(producer_id, navbat, vazifalar_soni, stop_event):
@@ -75,7 +83,7 @@ def istehmolchi(consumer_id, navbat, bajarilgan, stop_event):
         except queue.Empty:
             continue
 
-        if vazifa == TUGASH:
+        if vazifa.tugash:
             navbat.task_done()
             break
 
@@ -148,7 +156,7 @@ if __name__ == "__main__":
 
     # Consumerlarni to'xtatish uchun tugash signallari
     for _ in range(CONSUMERLAR_SONI):
-        navbat.put(TUGASH)
+        navbat.put(tugash_signali())
 
     for t in consumer_oqimlari:
         t.join()
