@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trello Database Schema - ERD Diagramma</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --primary: #0079bf;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --border: #334155;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 24px;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    header {
+      background: var(--card-bg);
+      padding: 24px 32px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      background: #0284c7;
+      color: #fff;
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      background: var(--primary);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #026aa7;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #334155;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      border-radius: 10px;
+    }
+    .stat-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+    .diagram-wrapper {
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+    .guide-section {
+      margin-top: 32px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 32px;
+    }
+    .guide-section h2 {
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .steps {
+      margin-left: 20px;
+      margin-top: 12px;
+    }
+    .steps li {
+      margin-bottom: 8px;
+    }
+    code {
+      background: #0f172a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>📋 Trello Maʼlumotlar Bazasi (ERD) <span class="badge">Murakkab Daraja</span></h1>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">
+          Workspaces, Boards, Lists, Cards, Checklists, Labels, Activities va boshqa asosiy modullarning to‘liq relyatsion modeli.
+        </p>
+      </div>
+      <div class="actions">
+        <button class="btn" onclick="window.print()">🖨️ PDF / Chop etish</button>
+      </div>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Jami Jadvallar</div>
+        <div class="stat-value">17 ta</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Asosiy Qismlar</div>
+        <div class="stat-value">6 ta modul</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Munosabatlar (Relations)</div>
+        <div class="stat-value">20+ bog‘lanish</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Moslik</div>
+        <div class="stat-value">PostgreSQL / MySQL</div>
+      </div>
+    </div>
+
+    <div class="diagram-wrapper">
+      <pre class="mermaid">
+erDiagram
+    users ||--o{ workspaces : "creates/owns"
+    users ||--o{ workspace_members : "belongs_to"
+    workspaces ||--o{ workspace_members : "contains"
+    
+    workspaces ||--o{ boards : "contains"
+    template_categories ||--o{ boards : "categorizes"
+    users ||--o{ boards : "creates"
+    
+    boards ||--o{ board_members : "has"
+    users ||--o{ board_members : "participates_in"
+    
+    boards ||--o{ lists : "contains"
+    boards ||--o{ labels : "defines"
+    boards ||--o{ activities : "logs"
+    
+    lists ||--o{ cards : "contains"
+    
+    cards ||--o{ card_members : "assigned_to"
+    users ||--o{ card_members : "receives_task"
+    
+    cards ||--o{ card_labels : "tagged_with"
+    labels ||--o{ card_labels : "applies_to"
+    
+    cards ||--o{ checklists : "has"
+    checklists ||--o{ checklist_items : "contains"
+    users ||--o{ checklist_items : "assigned_subtask"
+    
+    cards ||--o{ attachments : "includes"
+    users ||--o{ attachments : "uploads"
+    
+    cards ||--o{ comments : "receives"
+    users ||--o{ comments : "writes"
+    
+    cards ||--o{ activities : "tracked_in"
+    users ||--o{ activities : "performs"
+    
+    users ||--o{ notifications : "receives"
+    activities ||--o{ notifications : "triggers"
+
+    users {
+        bigint id PK
+        varchar username UK
+        varchar email UK
+        varchar password_hash
+        varchar full_name
+        text avatar_url
+        varchar status
+    }
+
+    workspaces {
+        bigint id PK
+        varchar name
+        varchar slug UK
+        varchar visibility
+        bigint owner_id FK
+    }
+
+    workspace_members {
+        bigint id PK
+        bigint workspace_id FK
+        bigint user_id FK
+        varchar role
+    }
+
+    template_categories {
+        bigint id PK
+        varchar name
+        varchar slug UK
+        varchar icon
+    }
+
+    boards {
+        bigint id PK
+        bigint workspace_id FK
+        varchar title
+        varchar visibility
+        boolean is_template
+        bigint template_category_id FK
+        bigint created_by FK
+    }
+
+    board_members {
+        bigint id PK
+        bigint board_id FK
+        bigint user_id FK
+        varchar role
+    }
+
+    lists {
+        bigint id PK
+        bigint board_id FK
+        varchar title
+        float position
+        boolean is_archived
+    }
+
+    cards {
+        bigint id PK
+        bigint list_id FK
+        bigint board_id FK
+        varchar title
+        text description
+        float position
+        timestamp due_date
+        boolean is_completed
+        boolean is_template
+        bigint created_by FK
+    }
+
+    card_members {
+        bigint id PK
+        bigint card_id FK
+        bigint user_id FK
+    }
+
+    labels {
+        bigint id PK
+        bigint board_id FK
+        varchar name
+        varchar color
+    }
+
+    card_labels {
+        bigint id PK
+        bigint card_id FK
+        bigint label_id FK
+    }
+
+    checklists {
+        bigint id PK
+        bigint card_id FK
+        varchar title
+        float position
+    }
+
+    checklist_items {
+        bigint id PK
+        bigint checklist_id FK
+        text content
+        boolean is_checked
+        float position
+        bigint assigned_to FK
+    }
+
+    attachments {
+        bigint id PK
+        bigint card_id FK
+        bigint uploader_id FK
+        varchar file_name
+        text file_url
+        bigint file_size
+    }
+
+    comments {
+        bigint id PK
+        bigint card_id FK
+        bigint user_id FK
+        text content
+    }
+
+    activities {
+        bigint id PK
+        bigint board_id FK
+        bigint card_id FK
+        bigint user_id FK
+        varchar action_type
+        jsonb action_data
+    }
+
+    notifications {
+        bigint id PK
+        bigint recipient_id FK
+        bigint sender_id FK
+        bigint activity_id FK
+        text content
+        boolean is_read
+    }
+      </pre>
+    </div>
+
+    <div class="guide-section">
+      <h2>🚀 Onlayn Havola (Link) Olish Bo‘yicha Qo‘llanma</h2>
+      <p>Tekshiruvchiga topshirish uchun onlayn havola olish juda oson:</p>
+      <ol class="steps">
+        <li><strong>dbdiagram.io orqali:</strong> <a href="https://dbdiagram.io" target="_blank" style="color: var(--accent);">dbdiagram.io</a> saytiga kiring, ushbu papkadagi <code>trello_schema.dbml</code> fayli ichidagi barcha matnni nusxalab saytdagi maydonga joylang. So‘ng <strong>"Share"</strong> tugmasi orqali ommaviy havola linkini oling.</li>
+        <li><strong>drawsql.app orqali:</strong> <a href="https://drawsql.app" target="_blank" style="color: var(--accent);">drawsql.app</a> saytiga kiring, yangi PostgreSQL diagrammasi ochib, <strong>"Import SQL"</strong> bo‘limiga papkadagi <code>trello_schema.sql</code> faylini joylang va havolani nusxalang.</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      er: {
+        useMaxWidth: false
+      }
+    });
+  </script>
+</body>
+</html>
+

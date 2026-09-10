@@ -1,0 +1,240 @@
+// ==========================================
+// TRELLO DATABASE SCHEMA (DBML)
+// Ushbu fayl dbdiagram.io yoki drawsql.app saytiga
+// to'g'ridan-to'g'ri import qilish uchun mo'ljallangan.
+// ==========================================
+
+Table users {
+  id bigint [pk, increment]
+  username varchar(50) [unique, not null]
+  email varchar(255) [unique, not null]
+  password_hash varchar(255) [not null]
+  full_name varchar(100) [not null]
+  avatar_url text
+  bio text
+  status varchar(20) [default: 'active', note: 'active, inactive, suspended']
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table workspaces {
+  id bigint [pk, increment]
+  name varchar(100) [not null]
+  slug varchar(100) [unique, not null]
+  description text
+  type varchar(50) [note: 'engineering, marketing, personal, operations']
+  visibility varchar(20) [default: 'private', note: 'private, public']
+  owner_id bigint [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table workspace_members {
+  id bigint [pk, increment]
+  workspace_id bigint [not null]
+  user_id bigint [not null]
+  role varchar(20) [default: 'member', note: 'admin, member, guest']
+  joined_at timestamp [default: `now()`]
+
+  indexes {
+    (workspace_id, user_id) [unique]
+  }
+}
+
+Table template_categories {
+  id bigint [pk, increment]
+  name varchar(100) [not null]
+  slug varchar(100) [unique, not null]
+  description text
+  icon varchar(50)
+  created_at timestamp [default: `now()`]
+}
+
+Table boards {
+  id bigint [pk, increment]
+  workspace_id bigint [not null]
+  title varchar(150) [not null]
+  description text
+  visibility varchar(20) [default: 'workspace', note: 'private, workspace, public']
+  background_color varchar(20)
+  background_image_url text
+  is_closed boolean [default: false, note: 'Arxivlangan yoki yopilgan doska']
+  is_template boolean [default: false, note: 'Shablon (Template) sifatida belgilash']
+  template_category_id bigint [null]
+  created_by bigint [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table board_members {
+  id bigint [pk, increment]
+  board_id bigint [not null]
+  user_id bigint [not null]
+  role varchar(20) [default: 'member', note: 'admin, member, observer']
+  joined_at timestamp [default: `now()`]
+
+  indexes {
+    (board_id, user_id) [unique]
+  }
+}
+
+Table lists {
+  id bigint [pk, increment]
+  board_id bigint [not null]
+  title varchar(150) [not null]
+  position float [not null, default: 65535.0, note: 'Karta va ustunlarni tartiblash (LexoRank/Float)']
+  is_archived boolean [default: false]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table cards {
+  id bigint [pk, increment]
+  list_id bigint [not null]
+  board_id bigint [not null]
+  title varchar(255) [not null]
+  description text
+  position float [not null, default: 65535.0]
+  due_date timestamp [null]
+  due_date_reminder integer [null, note: 'Daqiqalarda eslatma vaqti']
+  is_completed boolean [default: false]
+  is_archived boolean [default: false]
+  is_template boolean [default: false, note: 'Karta shabloni']
+  cover_image_url text
+  cover_color varchar(20)
+  created_by bigint [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table card_members {
+  id bigint [pk, increment]
+  card_id bigint [not null]
+  user_id bigint [not null]
+  assigned_at timestamp [default: `now()`]
+
+  indexes {
+    (card_id, user_id) [unique]
+  }
+}
+
+Table labels {
+  id bigint [pk, increment]
+  board_id bigint [not null]
+  name varchar(50)
+  color varchar(30) [not null, note: 'red, green, blue, #HEX va h.k.']
+  created_at timestamp [default: `now()`]
+}
+
+Table card_labels {
+  id bigint [pk, increment]
+  card_id bigint [not null]
+  label_id bigint [not null]
+
+  indexes {
+    (card_id, label_id) [unique]
+  }
+}
+
+Table checklists {
+  id bigint [pk, increment]
+  card_id bigint [not null]
+  title varchar(150) [not null]
+  position float [not null, default: 65535.0]
+  created_at timestamp [default: `now()`]
+}
+
+Table checklist_items {
+  id bigint [pk, increment]
+  checklist_id bigint [not null]
+  content text [not null]
+  is_checked boolean [default: false]
+  position float [not null, default: 65535.0]
+  due_date timestamp [null]
+  assigned_to bigint [null]
+  created_at timestamp [default: `now()`]
+}
+
+Table attachments {
+  id bigint [pk, increment]
+  card_id bigint [not null]
+  uploader_id bigint [not null]
+  file_name varchar(255) [not null]
+  file_url text [not null]
+  file_type varchar(100)
+  file_size bigint [note: 'Baytlarda']
+  created_at timestamp [default: `now()`]
+}
+
+Table comments {
+  id bigint [pk, increment]
+  card_id bigint [not null]
+  user_id bigint [not null]
+  content text [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp [default: `now()`]
+}
+
+Table activities {
+  id bigint [pk, increment]
+  user_id bigint [not null]
+  board_id bigint [not null]
+  card_id bigint [null]
+  action_type varchar(50) [not null, note: 'card_created, card_moved, comment_added, list_archived']
+  action_data text [note: 'JSON maʼlumotlari (old/new state)']
+  created_at timestamp [default: `now()`]
+}
+
+Table notifications {
+  id bigint [pk, increment]
+  recipient_id bigint [not null]
+  sender_id bigint [null]
+  activity_id bigint [null]
+  content text [not null]
+  is_read boolean [default: false]
+  created_at timestamp [default: `now()`]
+}
+
+// BOG'LANISHLAR (RELATIONSHIPS)
+Ref: workspaces.owner_id > users.id [delete: cascade]
+Ref: workspace_members.workspace_id > workspaces.id [delete: cascade]
+Ref: workspace_members.user_id > users.id [delete: cascade]
+
+Ref: boards.workspace_id > workspaces.id [delete: cascade]
+Ref: boards.created_by > users.id
+Ref: boards.template_category_id > template_categories.id [delete: set null]
+
+Ref: board_members.board_id > boards.id [delete: cascade]
+Ref: board_members.user_id > users.id [delete: cascade]
+
+Ref: lists.board_id > boards.id [delete: cascade]
+
+Ref: cards.list_id > lists.id [delete: cascade]
+Ref: cards.board_id > boards.id [delete: cascade]
+Ref: cards.created_by > users.id
+
+Ref: card_members.card_id > cards.id [delete: cascade]
+Ref: card_members.user_id > users.id [delete: cascade]
+
+Ref: labels.board_id > boards.id [delete: cascade]
+Ref: card_labels.card_id > cards.id [delete: cascade]
+Ref: card_labels.label_id > labels.id [delete: cascade]
+
+Ref: checklists.card_id > cards.id [delete: cascade]
+Ref: checklist_items.checklist_id > checklists.id [delete: cascade]
+Ref: checklist_items.assigned_to > users.id [delete: set null]
+
+Ref: attachments.card_id > cards.id [delete: cascade]
+Ref: attachments.uploader_id > users.id
+
+Ref: comments.card_id > cards.id [delete: cascade]
+Ref: comments.user_id > users.id
+
+Ref: activities.board_id > boards.id [delete: cascade]
+Ref: activities.card_id > cards.id [delete: set null]
+Ref: activities.user_id > users.id
+
+Ref: notifications.recipient_id > users.id [delete: cascade]
+Ref: notifications.sender_id > users.id [delete: set null]
+Ref: notifications.activity_id > activities.id [delete: set null]
+

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Kelib tushgan xabarlar jadvali{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card card-custom p-4 p-md-5">
+            <!-- Sarlavha va yangi xabar qo'shish tugmasi -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h2 class="fw-bold text-white mb-0">Xabarlar Jadvali</h2>
+                        <span class="page-badge">{{ messages_list|length }} ta xabar</span>
+                    </div>
+                    <p class="text-secondary mb-0">Foydalanuvchilar tomonidan yuborilgan barcha xabarlar ro‘yxati</p>
+                </div>
+                <div>
+                    <a href="{% url 'contact' %}" class="btn btn-primary-custom d-inline-flex align-items-center gap-2">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span>Yangi xabar yuborish</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Jadval -->
+            {% if messages_list %}
+                <div class="table-responsive">
+                    <table class="table custom-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="text-center" style="width: 60px;">№</th>
+                                <th scope="col">Ism</th>
+                                <th scope="col">Familiya</th>
+                                <th scope="col">Telefon raqam</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Yuborilgan xabar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in messages_list %}
+                                <tr>
+                                    <td class="text-center fw-bold text-info">
+                                        {{ forloop.counter }}
+                                    </td>
+                                    <td class="fw-medium text-white">
+                                        {{ item.first_name }}
+                                    </td>
+                                    <td class="fw-medium text-white">
+                                        {{ item.last_name }}
+                                    </td>
+                                    <td class="text-nowrap">
+                                        <a href="tel:{{ item.phone_number }}" class="text-info text-decoration-none">
+                                            <i class="bi bi-telephone me-1 text-secondary"></i>{{ item.phone_number }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:{{ item.email }}" class="text-decoration-underline text-info">
+                                            {{ item.email }}
+                                        </a>
+                                    </td>
+                                    <td class="text-break" style="min-width: 250px; line-height: 1.6;">
+                                        {{ item.message }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3 text-secondary opacity-50">
+                        <i class="bi bi-inbox fs-1"></i>
+                    </div>
+                    <h5 class="text-white">Hozircha hech qanday xabar mavjud emas</h5>
+                    <p class="text-secondary mb-4">Birinchi bo‘lib xabar yuborish uchun quyidagi tugmani bosing.</p>
+                    <a href="{% url 'contact' %}" class="btn btn-primary-custom">
+                        <i class="bi bi-pencil-square me-1"></i> Xabar qoldirish
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
